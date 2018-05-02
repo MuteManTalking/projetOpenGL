@@ -38,12 +38,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES32.glEnable(GLES32.GL_DEPTH_TEST);
         GLES32.glDepthFunc(GLES32.GL_LEQUAL);
 
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 0, 0f, 0f, 0.5f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 0.5f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         Matrix.perspectiveM(mProjectionMatrix, 0, 70.0f, 9.0f / 16.0f, 0.1f, 100.0f);
         Matrix.setIdentityM(mModelMatrix,0);
 
-        //mModel = ModelLoader.readOBJFile(mContext, "cube.obj");
-       // mModel.init("vertexshader.vert", "fragmentshader.frag","vPosition", "vNormal", "vTexcoord", R.drawable.miramar_bk);
+
+
+        mModel = ModelLoader.readOBJFile(mContext, "cube.obj");
+        mModel.init("vertexshader.vert", "fragmentshader.frag","vPosition", "vNormal", "vTexcoord", R.drawable.miramar_bk);
+
         mCube = new Cube();
         mCube.addLight(new Light(0, 2, 0));
         mCube2 = new Cube();
@@ -62,9 +65,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         Log.d("Debug", "onDrawFrame");
+
         GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT | GLES32.GL_DEPTH_BUFFER_BIT);
+
+        float[] temp = new float[16];
+        Matrix.scaleM(temp,0,mModelMatrix,0,150,150,150);
+
+        mModel.draw(mProjectionMatrix,mViewMatrix,temp);
+        /*
         mCube.draw(mProjectionMatrix, mViewMatrix, mModelMatrix);
-        mCube2.draw(mProjectionMatrix, mViewMatrix, mModelMatrix);
+
+        float[] temp = new float[16];
+        Matrix.translateM(temp,0,mModelMatrix,0,5,0,0);
+
+        mCube2.draw(mProjectionMatrix, mViewMatrix, temp);
+        */
     }
 
 
