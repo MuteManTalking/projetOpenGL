@@ -1,22 +1,56 @@
 package proggraph.openglprojet;
 
-import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
+import android.view.MotionEvent;
 
 class MyGLSurfaceView extends GLSurfaceView {
+    private final MyGLRenderer myRenderer;
+    private final float TOUCH_SCALE_FACTOR = 0.00001f;
+    private float mPreviousX;
+    private float mPreviousY;
 
-    private final MyGLRenderer mRenderer;
+    public boolean onTouchEvent(MotionEvent e) {
+        float x = e.getX();
+        float y = e.getY();
 
-    public MyGLSurfaceView(Context context ) {
-        super(context);
+        switch (e.getAction()) {
+            case MotionEvent.ACTION_MOVE:
 
-        //Create an OpenGL ES 2.0 context
+                float dx = x - mPreviousX;
+                float dy = y - mPreviousY;
+                if(dx > -getWidth()/2 && dx < getWidth()/2){
+                    dx = dx * 10;
+                }
+                if(dy > -getHeight()/2 && dy < getHeight()/2){
+                    dy = dy * -10;
+                }
+                myRenderer.translate(dx/10000.0f, dy/10000.0f, 0);
+                System.out.println(dx + " " + dy);
+                requestRender();
+
+        }
+
+        mPreviousX = x;
+        mPreviousY = y;
+
+        return true;
+    }
+
+    public MyGLSurfaceView(OpenGLActivity myMainActivity) {
+        super(myMainActivity);
+
+        Log.d("Debug : ", "MyGLSurfaceView");
         setEGLContextClientVersion(2);
+        Log.d("Debug : ", "Setting OpenGLES version");
 
-        mRenderer = new MyGLRenderer();
+        myRenderer = new MyGLRenderer(myMainActivity);
 
-        //Set the renderer for drawing on the GLSurfaceView
-        setRenderer(mRenderer);
-
+        Log.d("Debug : ", "Initialize renderer");
+        setRenderer(myRenderer);
+        Log.d("Debug : ", "Set renderer");
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        Log.d("Debug : ", "Set render mode");
+        //setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 }

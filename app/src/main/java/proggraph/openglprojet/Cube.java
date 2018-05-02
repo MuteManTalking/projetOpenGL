@@ -1,92 +1,53 @@
 package proggraph.openglprojet;
 
-import android.opengl.GLES20;
-
-
+import android.opengl.GLES32;
+import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Vector;
+
 
 public class Cube {
 
+    //IntBuffer vboID;
+    private int mIdProjMatrix;
+    private int mIdViewMatrix;
+    private int mIdModelMatrix;
 
-    private final String vertexShaderCode =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
-                    "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    // Note that the uMVPMatrix factor *must be first* in order
-                    // for the matrix multiplication product to be correct.
-                    "  gl_Position = uMVPMatrix * vPosition;" +
-                    "}";
+    Vector<Light> mLights;
+    private float vertices[] = {
+            -1, -1, 1, //0
+            1, -1, 1, //1
+            1, 1, 1, //2
+            -1, 1, 1, //3
 
-    private final String fragmentShaderCode=
-            "precision mediump float;"+
-                    "uniform vec4 vColor;"+
-                    "void main(){"+
-                    "gl_FragColor = vColor;"+
-                    "}";
+            1, -1, 1, //1 4
+            1, 1, 1, //2 5
+            1, 1, -1, //6 6
+            1, -1, -1, //5 7
 
+            -1, -1, -1, //4 8
+            1, -1, -1, //5 9
+            1, 1, -1, //6 10
+            -1, 1, -1, //7 11
 
-    // Use to access and set the view transformation
-    private int mMVPMatrixHandle;
-    private int mPositionHandle;
-    private int mColorHandle;
+            -1, -1, 1, //0 12
+            -1, -1, -1, //4 13
+            -1, 1, -1, //7 14
+            -1, 1, 1, //3 15
 
-    private final int vertexCount = cubeCoords.length / COORDS_PER_VERTEX;
-    private final int vertexStride =COORDS_PER_VERTEX * 4; //4  bytes per vertex
+            -1, 1, 1, //3 16
+            -1, 1, -1, //7 17
+            1, 1, -1, //6 18
+            1, 1, 1, //2 19
 
-
-    private FloatBuffer vertexBuffer;
-    private ByteBuffer mIndexBuffer;
-
-    private FloatBuffer mTexBuffer;
-
-    // number of coordinates per vertex in this array
-    static final int COORDS_PER_VERTEX = 3;
-
-    static float cubeCoords[] = {
-
-            //face avant
-            -1, -1, 1, //0      0
-             1, -1, 1, //1      1
-             1,  1, 1, //2      2
-            -1,  1, 1, //3      3
-
-            //face droite
-             1, -1,  1, //1     4
-             1,  1,  1, //2     5
-             1,  1, -1, //6     6
-             1, -1, -1, //5     7
-
-            //face arrière
-            -1, -1, -1, //4     8
-             1, -1, -1, //5     9
-             1,  1, -1, //6     10
-            -1,  1, -1, //7     11
-
-            //face gauche
-            -1, -1,  1, //0     12
-            -1, -1, -1, //4     13
-            -1,  1, -1, //7     14
-            -1,  1,  1, //3     15
-
-            //face dessus
-            -1, 1,  1, //3      16
-            -1, 1, -1, //7      17
-             1, 1, -1, //6      18
-             1, 1,  1, //2      19
-
-            //face dessous
-            -1, -1,  1, //0     20
-            -1, -1, -1, //4     21
-             1, -1, -1, //5     22
-             1, -1,  1  //1     23
+            -1, -1, 1, //0 20
+            -1, -1, -1, //4 21
+            1, -1, -1, //5 22
+            1, -1, 1  //1 23
 
     };
-//
 
     private byte indices[] = {
             0, 1, 2,
@@ -107,7 +68,7 @@ public class Cube {
             20, 21, 22,
             22, 23, 20
     };
-    /*
+
     private float tex_coords[] = {
             0.0f, 0.0f, 1.0f, 0.0f,
             1.0f, 1.0f, 0.0f, 1.0f,
@@ -126,98 +87,120 @@ public class Cube {
 
             0.0f, 0.0f, 1.0f, 0.0f,
             1.0f, 1.0f, 0.0f, 1.0f,
-    };*/
+    };
+
+    private FloatBuffer mVertexBuffer;
+    private ByteBuffer mIndexBuffer;
+    private FloatBuffer mTexBuffer;
+
+    private static final int COORDS_PER_VERTEX = 3;
+
+    private static final int COORDS_PER_TEX = 2;
+
+    private final int VERTEX_STRIDE = COORDS_PER_VERTEX * 4;
+    private final int TEX_STRIDE = COORDS_PER_TEX * 4;
 
 
+    private int mProgram;
+    private int mVertexID;
+    private int mTexCoordID;
+    int[] linkStatus = {0};
 
-    //set color with red, green blue and alpha (opacity) values
-    float color []= {0.63f,0.76f,0.22f,1.0f};
+    private int texID[];
 
+    public Cube() {
+        mLights = new Vector<>();
+        ByteBuffer byteBuf = ByteBuffer.allocateDirect(vertices.length * 4);
+        byteBuf.order(ByteOrder.nativeOrder());
+        mVertexBuffer = byteBuf.asFloatBuffer();
+        mVertexBuffer.put(vertices);
+        mVertexBuffer.position(0);
 
-    private final int mProgram;
-
-
-    public Cube (){
-
-        //initialize vertex byte buffer for shape coordinates
-        //number of coordinate values * 4 bytes per float
-        ByteBuffer bb = ByteBuffer.allocateDirect(cubeCoords.length*4);
-
-        //use the device hardware's native byte order
-        bb.order(ByteOrder.nativeOrder());
-
-        //create a floating point buffer from the ByteBuffer
-        vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(cubeCoords);
-        vertexBuffer.position(0);
-
-        /*
-        bb = ByteBuffer.allocateDirect(tex_coords.length * 4);
-        bb.order(ByteOrder.nativeOrder());
-        mTexBuffer = bb.asFloatBuffer();
+        byteBuf = ByteBuffer.allocateDirect(tex_coords.length * 4);
+        byteBuf.order(ByteOrder.nativeOrder());
+        mTexBuffer = byteBuf.asFloatBuffer();
         mTexBuffer.put(tex_coords);
         mTexBuffer.position(0);
-        */
+
         mIndexBuffer = ByteBuffer.allocateDirect(indices.length);
         mIndexBuffer.put(indices);
         mIndexBuffer.position(0);
 
 
+        mProgram = GLES32.glCreateProgram();
 
-        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER,vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,fragmentShaderCode);
+        Log.d("Debug: ", "Cube: mProgram : " + mProgram);
+        int vertexShader = ShaderUtilities.loadShader(GLES32.GL_VERTEX_SHADER,
+                "vertexshader.vert");
+        int fragShader = ShaderUtilities.loadShader(GLES32.GL_FRAGMENT_SHADER,
+                "fragmentshader.frag");
+        GLES32.glAttachShader(mProgram, vertexShader);
+        Log.d("Debug :", "Attach vertex shader : " + vertexShader);
+        GLES32.glAttachShader(mProgram, fragShader);
+        Log.d("Debug :", "Attach fragment shader : " + fragShader);
+        GLES32.glLinkProgram(mProgram);
+        GLES32.glGetProgramiv(mProgram, GLES32.GL_LINK_STATUS, linkStatus, 0);
 
-        //create empty OpenGL ES Program
-        mProgram = GLES20.glCreateProgram();
+        mVertexID = GLES32.glGetAttribLocation(mProgram, "vPosition");
+        mTexCoordID = GLES32.glGetAttribLocation(mProgram, "vTexCoord");
 
-        //add the vertex shader to program
-        GLES20.glAttachShader(mProgram,vertexShader);
+        mIdProjMatrix = GLES32.glGetUniformLocation(mProgram, "projection");
+        mIdViewMatrix = GLES32.glGetUniformLocation(mProgram, "view");
+        mIdModelMatrix = GLES32.glGetUniformLocation(mProgram, "model");
 
-        //add the fragment shader to program
-        GLES20.glAttachShader(mProgram,fragmentShader);
 
-        //create OpenGL ES program executables
-        GLES20.glLinkProgram(mProgram);
+        texID = new int[2];
+        GLES32.glGenTextures(2, texID, 0);
 
+        GLES32.glActiveTexture(GLES32.GL_TEXTURE0);
+        ShaderUtilities.loadTexture(R.drawable.brick, texID, 0);
+
+
+        GLES32.glActiveTexture(GLES32.GL_TEXTURE1);
+        ShaderUtilities.loadTexture(R.drawable.normal_map, texID, 1);
+
+        Log.d("Debug: ", "Cube: mVertexID : " + mVertexID);
+        Log.d("Debug: ", "Cube: mTexCoordID : " + mTexCoordID);
+        Log.d("Debug: ", "Cube: mIdProjMatrix : " + mIdProjMatrix);
+        Log.d("Debug: ", "Cube: mIdViewMatrix : " + mIdViewMatrix);
+        Log.d("Debug: ", "Cube: mIdModelMatrix : " + mIdModelMatrix);
     }
 
-    public void draw(float[] mvpMatrix){
-
-        // Add program to OpenGL ES environment
-        GLES20.glUseProgram(mProgram);
-
-        // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-
-        // Enable a handle to the cube vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
-
-        // Prepare the cube coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
-                vertexStride, vertexBuffer);
-
-
-
-        // get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
-
-        // Set color for drawing the cube
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
-
-
-        // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-
-        // Pass the projection and view transformation to the shader
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-
-        // Draw the cube
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES,vertexCount,GLES20.GL_UNSIGNED_BYTE,mIndexBuffer);
-
-        // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
+    public void addLight(Light l){
+        mLights.add(l);
     }
 
+    public void draw(float[] projection, float[] view, float[] model) {
+        // Add program to OpenGL environment.
+        GLES32.glUseProgram(mProgram);
+
+        // Prepare the cube coordinate data.
+        GLES32.glEnableVertexAttribArray(mVertexID);
+        GLES32.glVertexAttribPointer(mVertexID, 3, GLES32.GL_FLOAT, false, VERTEX_STRIDE, mVertexBuffer);
+
+        // Prepare the cube tex data.
+        GLES32.glEnableVertexAttribArray(mTexCoordID);
+        GLES32.glVertexAttribPointer(mTexCoordID, 2, GLES32.GL_FLOAT, false, TEX_STRIDE, mTexBuffer);
+
+        // Apply the projection and view transformation.
+        GLES32.glUniformMatrix4fv(mIdViewMatrix, 1, false, view, 0);
+        GLES32.glUniformMatrix4fv(mIdModelMatrix, 1, false, model, 0);
+        GLES32.glUniformMatrix4fv(mIdProjMatrix, 1, false, projection, 0);
+
+        GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, texID[0]);
+        GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, texID[1]);
+
+        for(Light l : mLights){
+            l.draw(mProgram);
+        }
+        // Draw the cube.
+        GLES32.glDrawElements(
+                GLES32.GL_TRIANGLES, indices.length, GLES32.GL_UNSIGNED_BYTE, mIndexBuffer);
+
+        // Disable vertex arrays.
+        GLES32.glDisableVertexAttribArray(mVertexID);
+        GLES32.glDisableVertexAttribArray(mTexCoordID);
+
+    }
 
 }
