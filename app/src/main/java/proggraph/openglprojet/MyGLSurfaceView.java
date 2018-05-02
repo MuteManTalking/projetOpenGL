@@ -20,12 +20,12 @@ class MyGLSurfaceView extends GLSurfaceView {
                 float dx = x - mPreviousX;
                 float dy = y - mPreviousY;
                 if(dx > -getWidth()/2 && dx < getWidth()/2){
-                    dx = dx * 10;
+                    dx = dx * -10;
                 }
                 if(dy > -getHeight()/2 && dy < getHeight()/2){
                     dy = dy * -10;
                 }
-                myRenderer.translate(dx/10000.0f, dy/10000.0f, 0);
+                myRenderer.translate(dx/1000.0f, dy/1000.0f, 0);
                 System.out.println(dx + " " + dy);
                 requestRender();
 
