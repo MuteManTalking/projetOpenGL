@@ -13,8 +13,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
-
-
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mModelMatrix = new float[16];
@@ -32,8 +30,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mContext = context;
         Log.d("Debug : ", "MyGLRenderer");
     }
-    //Cube mCube;
-    //Cube mCube2;
     Model3D mModel;
     Model3D mModelVaisseau;
     Model3D mModelAsteroid;
@@ -43,7 +39,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 
     public void translate(float dx, float dy, float dz){
-        //Matrix.translateM(mModelMatrix, 0, dx, dy, dz);
         Matrix.translateM(mModelMatrixVaisseau, 0, dx, dy, dz);
     }
 
@@ -68,19 +63,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mModelAsteroid3 = initialisation(mModelMatrixAsteroid3);
         mModelAsteroid4 = initialisation(mModelMatrixAsteroid4);
 
-       // mModel = ModelLoader.readOBJFile(mContext, "cube.obj");
         mModel = ModelLoader.readOBJFile(mContext, "cubeBis.obj");
         mModelVaisseau = ModelLoader.readOBJFile(mContext, "vaisseau.obj");
-        //mModelAsteroid = ModelLoader.readOBJFile(mContext, "cube.obj");
-        //mModelAsteroid2 = ModelLoader.readOBJFile(mContext, "cube.obj");
-
-
-        //int [] textures = {R.drawable.miramar_bk,R.drawable.miramar_dn,R.drawable.miramar_ft,R.drawable.miramar_lf,R.drawable.miramar_rt,R.drawable.miramar_up};
 
         mModel.init("vertexshader.vert", "fragmentshader.frag","vPosition", "vNormal", "vTexcoord", R.drawable.skyboxsun25degtest_tn);
         mModelVaisseau.init("vertexshader.vert", "fragmentshader.frag","vPosition", "vNormal", "vTexcoord", R.drawable.i);
-        //mModelAsteroid.init("vertexshader.vert", "fragmentshader.frag","vPosition", "vNormal", "vTexcoord", R.drawable.brick);
-        //mModelAsteroid2.init("vertexshader.vert", "fragmentshader.frag","vPosition", "vNormal", "vTexcoord", R.drawable.brick);
     }
 
     @Override
@@ -117,7 +104,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mModelVaisseau.draw(mProjectionMatrix,mViewMatrix,temp3);
     }
 
-    void respawn(Model3D model,float[] matrix){
+    private void respawn(Model3D model,float[] matrix){
         Random random = new Random();
         int i = 1;
         int randX = random.nextInt(i-(-i)+1)+(-i);
@@ -130,7 +117,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         model.draw(mProjectionMatrix,mViewMatrix,matrix);
     }
 
-    Model3D initialisation(float[] matrix ){
+    private Model3D initialisation(float[] matrix ){
         Matrix.setIdentityM(matrix,0);
         Matrix.translateM(matrix,0,1,1,-101.0f);
         Model3D modelinit = ModelLoader.readOBJFile(mContext, "cube.obj");
