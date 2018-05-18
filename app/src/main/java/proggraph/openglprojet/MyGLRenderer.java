@@ -4,7 +4,6 @@ import android.content.Context;
 import android.opengl.GLES32;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.provider.Settings;
 import android.util.Log;
 import java.util.Random;
 
@@ -114,13 +113,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.translateM(matrix,0,(float)randX,(float)randY, (float) (-110 + Math.random()*(-100-(-110))));
         }
         Matrix.translateM(matrix, 0, 0, 0, 0.3f);
-        model.draw(mProjectionMatrix,mViewMatrix,matrix);
+        float[] temp5 = new float[16];
+        Matrix.scaleM(temp5,0,matrix,0,0.02f,0.02f,0.02f);
+        model.draw(mProjectionMatrix,mViewMatrix,temp5);
     }
 
     private Model3D initialisation(float[] matrix ){
         Matrix.setIdentityM(matrix,0);
         Matrix.translateM(matrix,0,1,1,-101.0f);
-        Model3D modelinit = ModelLoader.readOBJFile(mContext, "cube.obj");
+        Model3D modelinit = ModelLoader.readOBJFile(mContext, "Asteroid.obj");
         modelinit.init("vertexshader.vert", "fragmentshader.frag","vPosition", "vNormal", "vTexcoord", R.drawable.brick);
         return modelinit;
     }
