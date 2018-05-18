@@ -13,14 +13,14 @@ in vec3 fragPos;
 //uniform vec3 lColor;
 //uniform vec3 cPosition;
 
-float ambientStrength = 0.2;
+float ambientStrength = 0.8;
 float specularStrength = 1.0;
 float diffuseStrength = 1.0;
 
 out vec4 color;
 void main() {
 
-vec3 lPosition = vec3(0, 2, 0);
+vec3 lPosition = vec3(1, 0.75, 1);
 vec3 lColor = vec3(1,1,1);
 vec3 cPosition = vec3(0,1, 2);
   float dist = distance(lPosition, fragPos);

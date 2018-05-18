@@ -130,6 +130,11 @@ public class Model3D {
         GLES32.glVertexAttribPointer(
                 mNormalID, 2, GLES32.GL_FLOAT, false, NORMAL_STRIDE, mNormalBuffer);
 
+
+        // Bind to the texture in OpenGL
+        GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, mTextureID[0]);
+
+
         GLES32.glDrawElements(
                 GLES32.GL_TRIANGLES, mIndices.length, GLES32.GL_UNSIGNED_INT, mIndexBuffer);
 

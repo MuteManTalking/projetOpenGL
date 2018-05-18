@@ -49,8 +49,8 @@ class MyGLSurfaceView extends GLSurfaceView {
         Log.d("Debug : ", "Initialize renderer");
         setRenderer(myRenderer);
         Log.d("Debug : ", "Set renderer");
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         Log.d("Debug : ", "Set render mode");
-        //setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 }
