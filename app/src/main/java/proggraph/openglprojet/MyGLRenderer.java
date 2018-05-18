@@ -42,12 +42,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(mProjectionMatrix, 0, 70.0f, 9.0f / 16.0f, 0.1f, 100.0f);
         Matrix.setIdentityM(mModelMatrix,0);
 
-        //mModel = ModelLoader.readOBJFile(mContext, "cube.obj");
-       // mModel.init("vertexshader.vert", "fragmentshader.frag","vPosition", "vNormal", "vTexcoord", R.drawable.miramar_bk);
-        mCube = new Cube();
+        mModel = ModelLoader.readOBJFile(mContext, "cube.obj");
+        mModel.init("vertexshader.vert", "fragmentshader.frag","vPosition", "vNormal", "vTexcoord", R.drawable.miramar_bk);
+
+        /*mCube = new Cube();
         mCube.addLight(new Light(0, 2, 0));
         mCube2 = new Cube();
-        mCube2.addLight(new Light(0, 2, 3));
+        mCube2.addLight(new Light(0, 2, 3));*/
     }
 
     @Override
@@ -69,10 +70,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.scaleM(temp,0,mModelMatrix,0,150,150,150);
 
         mModel.draw(mProjectionMatrix,mViewMatrix,temp);
-        /*
-        mCube.draw(mProjectionMatrix, mViewMatrix, mModelMatrix);
 
-        float[] temp = new float[16];
+        //mCube.draw(mProjectionMatrix, mViewMatrix, mModelMatrix);
+
+        /*float[] temp = new float[16];
         Matrix.translateM(temp,0,mModelMatrix,0,5,0,0);
 
         mCube2.draw(mProjectionMatrix, mViewMatrix, temp);

@@ -61,6 +61,12 @@ public class ShaderUtilities {
             // Bind to the texture in OpenGL
             GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, textureHandle[index]);
 
+
+
+
+
+
+
             // Set filtering
             GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MIN_FILTER, GLES32.GL_NEAREST);
             GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MAG_FILTER, GLES32.GL_NEAREST);

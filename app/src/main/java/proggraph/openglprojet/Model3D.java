@@ -95,7 +95,8 @@ public class Model3D {
         mTexID = GLES32.glGetAttribLocation(mProgram, texLoc);
 
 
-        mTextureID = new int[1];
+        mTextureID = new int[6];
+        GLES32.glGenTextures(1, mTextureID, 0);
         GLES32.glGenTextures(1, mTextureID, 0);
 
         GLES32.glActiveTexture(GLES32.GL_TEXTURE0);
